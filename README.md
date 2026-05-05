@@ -7,6 +7,26 @@
 
 ---
 
+## 0. 진행 순서 — 두 단계로 나뉨 (헷갈리지 말 것)
+
+```
+┌─────────────────────────┐    ┌─────────────────────────┐
+│  STAGE 1: 수동 배포      │    │  STAGE 2: 자동 배포      │
+│  (zip 업로드)           │    │  (CI/CD)                │
+│                        │ →  │                        │
+│  zip → scp → unzip     │    │  GitHub push           │
+│  → docker → nginx       │    │  → Actions → SSH       │
+│  → 시트 입력            │    │  → docker rebuild      │
+│                        │    │                        │
+│  목표: 한 번 떠 있는 것  │    │  목표: 앞으로 자동      │
+│  확인 (§ 3~6)           │    │  배포 되도록 (§ 7~8)    │
+└─────────────────────────┘    └─────────────────────────┘
+```
+
+**먼저 STAGE 1로 본인 도메인에 칼로리카운터가 뜨는 것 확인 → 그 다음 STAGE 2로 자동화.** STAGE 1을 건너뛰고 STAGE 2부터 시작하면 처음 동작 자체가 안 떠서 디버깅이 불가능.
+
+---
+
 ## 1. zip 안에 들어있는 것
 
 ```
@@ -44,6 +64,8 @@ week10_calorie/
 ---
 
 ## 3. 빠른 시작 (수업 중 슬롯 매핑)
+
+### ── STAGE 1: 수동 배포 (먼저 한 번 떠 있는 것 확인) ──
 
 ### 3-1. Oracle 서버에 zip 업로드 (§ 4-2)
 
@@ -106,6 +128,10 @@ https://<본인ID>-demo.aiweb2026.site
 → 음식 사진 업로드 → 칼로리 응답
 ```
 
+**여기까지 STAGE 1 끝.** 본인 도메인에 칼로리카운터가 떠 있는 것 확인 후 STAGE 2로 진행.
+
+### ── STAGE 2: 자동 배포 (앞으로 push만 하면 자동 갱신) ──
+
 ### 3-6. GitHub 리포 생성 + Secret 등록 (§ 7)
 
 ```bash
@@ -128,18 +154,7 @@ GitHub 리포 → Settings → Secrets → 4개 등록:
 - `SSH_KEY` = `~/.ssh/oracle_key` 전체 내용 (개행 포함)
 - `HF_TOKEN` = `hf_xxx`
 
-### 3-7. 첫 서버 git 연결 (§ 8-2, 1회만)
-
-```bash
-# Oracle 서버에서
-cd ~/calorie
-git init
-git remote add origin https://github.com/<본인>/my-calorie-counter.git
-git fetch origin main
-git reset --hard origin/main
-```
-
-### 3-8. 첫 자동 배포 (§ 8-3)
+### 3-7. 첫 자동 배포 (§ 8-3)
 
 ```bash
 # 학생 PC에서, my-calorie-counter 리포에 변경 push
@@ -150,7 +165,7 @@ git push origin main
 
 → GitHub Actions 그린 체크 → `<id>-demo.aiweb2026.site` 새로고침 → 변경 즉시 반영.
 
-### 3-9. 9주차 페이지 "Live Demo" 살리기 (§ 9)
+### 3-8. 9주차 페이지 "Live Demo" 살리기 (§ 9)
 
 ```bash
 # 9주차 페이지 리포에서

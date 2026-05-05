@@ -41,6 +41,8 @@ jobs:
 
       - name: 3. Oracle 서버에 SSH 접속하여 배포
         uses: appleboy/ssh-action@v1
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -48,12 +50,18 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 10m
-          # 처음 호스트 키 학습 (production은 known_hosts 권장)
-          script_stop: true
+          envs: REPO_URL
           script: |
             set -e
             echo "▶ 배포 시작: $(date)"
             cd /home/ubuntu/calorie
+
+            # 첫 배포라 .git이 없으면 자동 초기화
+            if [ ! -d .git ]; then
+              echo "▶ .git 없음 — 첫 배포로 판단하여 git init + remote 등록"
+              git init
+              git remote add origin "$REPO_URL"
+            fi
 
             echo "▶ 최신 코드 pull"
             git fetch origin main
